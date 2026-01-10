@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Send } from "lucide-react";
 import { promptOpenAI } from "@/lib/openai";
 import { IngredientSelector } from "@/components/ingredientSelector";
 import { UserProfileSelector } from "@/components/userProfileSelector";
 import { PantryShelf } from "@/components/pantryShelf";
 import { RecipeCard, RecipeData } from "@/components/recipeCard";
 import { HeroSection } from "@/components/hero";
+import { GenerateRecipeButton } from "@/components/button/generate-recipe-button";
 
 export default function SmartCookPage() {
   const [profileContext, setProfileContext] = useState("");
@@ -60,7 +60,7 @@ export default function SmartCookPage() {
   // Otherwise, show the Form
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-12 font-sans text-slate-800">
-      <div className="min-h-screen max-w-3xl mx-auto space-y-10">
+      <div className="min-h-screen max-w-3xl mx-auto space-y-10 pb-24 relative">
         <HeroSection />
 
         {/* PROFILE SECTION */}
@@ -77,25 +77,11 @@ export default function SmartCookPage() {
         <PantryShelf onContextUpdate={(ctx) => setPantryContext(ctx)} />
 
         {/* PROMPT LLM BUTTON */}
-        <div className="sticky bottom-2 flex justify-center">
-          <button
-            onClick={generatePrompt}
-            disabled={isGenerating || ingredientsContext.trim() === ""}
-            className={`flex items-center gap-3 px-8 py-4 rounded-full font-bold text-lg shadow-xl transition-all hover:scale-105 ${
-              ingredientsContext.trim() === ""
-                ? "bg-gray-300 text-gray-500"
-                : "bg-black text-white hover:bg-gray-800"
-            }`}
-          >
-            {isGenerating ? (
-              "Thinking..."
-            ) : (
-              <>
-                <Send className="w-5 h-5" /> Generate Recipe
-              </>
-            )}
-          </button>
-        </div>
+        <GenerateRecipeButton
+          onClick={generatePrompt}
+          isDisabled={isGenerating || ingredientsContext.trim() === ""}
+          isGenerating={isGenerating}
+        />
       </div>
     </div>
   );

@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Utensils, Check, ChevronDown } from "lucide-react"; // Added ChevronDown
+import { useEffect, useState, useMemo } from "react";
+import { Utensils, Check, ChevronDown, Search, Plus, X } from "lucide-react";
 import { INGREDIENTS } from "@/lib/config";
+import { H2, H3 } from "./typography/heading";
+import { Button } from "./button/clickable";
 
-// Flatten list to helper identify "Custom" vs "Predefined" items
 const ALL_PREDEFINED = Object.values(INGREDIENTS).flat();
+const CATEGORIES = Object.keys(INGREDIENTS);
 
 interface IngredientSelectorProps {
   onContextUpdate: (contextString: string) => void;
@@ -21,37 +23,26 @@ const AllowExtraToggle = ({
   setAllowExtras,
 }: AllowExtraToggleProps) => {
   return (
-    <div className="flex mb-6 bg-gray-50 p-2 rounded-xl border border-gray-100">
-      <label className="flex items-center gap-3 cursor-pointer group w-full p-1">
-        {/* The Invisible Checkbox */}
+    <div className="flex mb-4 items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100">
+      <div className="flex flex-col text-left">
+        <span className="text-sm font-bold text-slate-800">
+          Allow Extra Ingredients?
+        </span>
+        <span className="text-[10px] text-slate-500 font-medium">
+          {allowExtras
+            ? "Chef can suggest items to buy"
+            : "Strict: Cook ONLY with what I have"}
+        </span>
+      </div>
+
+      <label className="relative inline-flex items-center cursor-pointer">
         <input
           type="checkbox"
           className="sr-only peer"
           checked={allowExtras}
           onChange={(e) => setAllowExtras(e.target.checked)}
         />
-
-        {/* The Switch Visual */}
-        <div className="relative w-10 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:bg-black transition-all shrink-0">
-          {/* The Knob */}
-          <div
-            className={`absolute top-[2px] left-[2px] bg-white border-gray-300 border rounded-full h-5 w-5 transition-all ${
-              allowExtras ? "translate-x-[80%] border-white" : ""
-            }`}
-          ></div>
-        </div>
-
-        {/* Label Text */}
-        <div className="flex flex-col text-left">
-          <span className="text-sm font-bold text-slate-800">
-            Allow Extra Ingredients
-          </span>
-          <span className="text-[10px] text-slate-500 font-medium">
-            {allowExtras
-              ? "Chef can suggest items to buy"
-              : "Strict mode: Cook ONLY with what I have"}
-          </span>
-        </div>
+        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
       </label>
     </div>
   );
@@ -60,182 +51,196 @@ const AllowExtraToggle = ({
 export function IngredientSelector({
   onContextUpdate,
 }: IngredientSelectorProps) {
-  // UI State for Collapsible
-  const [isOpen, setIsOpen] = useState(false); // Default to collapsed to save space
-
-  // Data State
-  const [inputValue, setInputValue] = useState("");
+  const [isOpen, setIsOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(CATEGORIES[0]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [allowExtras, setAllowExtras] = useState(true);
 
+  // -- LOGIC: Context Update --
   const strictModeInstruction = allowExtras
-    ? "If the recipe needs essential items I didn't list (like Oil, Salt, specific sauces), list them in 'missingIngredients'."
-    : "STRICT MODE ACTIVE: You must ONLY use the ingredients listed above. Do NOT suggest buying new items. If the result is simple or dry, that is acceptable. Do not populate 'missingIngredients'.";
+    ? "If essential items are missing (Oil, Salt, etc), list them."
+    : "STRICT MODE: Only use provided ingredients.";
 
   useEffect(() => {
     const promptPayload =
       selectedItems.length === 0
         ? ""
-        : `
-      AVAILABLE INGREDIENTS:
-      ${selectedItems.join(", ")}
-      ${strictModeInstruction}
-    `.trim();
+        : `AVAILABLE INGREDIENTS:\n${selectedItems.join(
+            ", "
+          )}\n${strictModeInstruction}`;
     onContextUpdate(promptPayload);
   }, [selectedItems, onContextUpdate, strictModeInstruction]);
 
-  const handleToggleIngredient = (item: string) => {
+  // -- LOGIC: Filtering --
+  // 1. If Searching: Search across ALL categories
+  // 2. If Not Searching: Show only items in Active Tab
+  const visibleIngredients = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return INGREDIENTS[activeTab as keyof typeof INGREDIENTS] || [];
+    }
+    return ALL_PREDEFINED.filter((item) =>
+      item.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [activeTab, searchQuery]);
+
+  const handleToggle = (item: string) => {
     if (selectedItems.includes(item)) {
-      setSelectedItems(selectedItems.filter((i) => i !== item));
+      setSelectedItems((prev) => prev.filter((i) => i !== item));
     } else {
-      setSelectedItems([...selectedItems, item]);
+      setSelectedItems((prev) => [...prev, item]);
     }
   };
 
   const handleAddCustom = () => {
-    const trimmed = inputValue.trim();
-    if (trimmed) {
-      if (!selectedItems.includes(trimmed)) {
-        handleToggleIngredient(trimmed);
-      }
-      setInputValue("");
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      handleAddCustom();
+    const trimmed = searchQuery.trim();
+    if (trimmed && !selectedItems.includes(trimmed)) {
+      handleToggle(trimmed);
+      setSearchQuery(""); // Clear search after adding
     }
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
-      {/* 1. CLICKABLE HEADER */}
+      {/* HEADER */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-6 hover:bg-gray-50/50 transition-colors text-left"
       >
         <div className="flex items-center gap-3">
           <div
-            className={`p-2 rounded-full ${
+            className={`p-2 rounded-full transition-colors ${
               selectedItems.length > 0
-                ? "bg-blue-100 text-blue-600"
-                : "bg-gray-100 text-gray-500"
+                ? "bg-black text-white"
+                : "bg-gray-100 text-gray-400"
             }`}
           >
             <Utensils className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Ingredients</h3>
+            <H3>Ingredients</H3>
             <p className="text-sm text-slate-500">
               {selectedItems.length === 0
-                ? "Select what you have in the fridge"
-                : `${selectedItems.length} item${
-                    selectedItems.length === 1 ? "" : "s"
-                  } selected • ${
-                    allowExtras ? "Allow" : "No"
-                  } Extra Ingredients`}
+                ? "What's in your fridge?"
+                : `${selectedItems.length} selected`}
             </p>
           </div>
         </div>
-
-        {/* Chevron Animation */}
         <ChevronDown
-          className={`w-5 h-5 text-gray-400 transition-transform duration-300 ${
+          className={`w-5 h-5 text-gray-400 transition-transform ${
             isOpen ? "rotate-180" : ""
           }`}
         />
       </button>
 
-      {/* 2. COLLAPSIBLE CONTENT */}
-      {/* We use a conditional render or CSS display here. Conditional is cleaner for DOM. */}
       {isOpen && (
-        <div className="p-6 pt-0 border-t border-gray-100 animate-in slide-in-from-top-2 fade-in duration-200">
-          <div className="mt-6">
+        <div className="p-6 pt-0 border-t border-gray-100 animate-in slide-in-from-top-2">
+          {/* 1. CONTROLS SECTION */}
+          <div className="space-y-4 mt-6">
             <AllowExtraToggle
               allowExtras={allowExtras}
               setAllowExtras={setAllowExtras}
             />
-          </div>
 
-          <div className="space-y-8">
-            {/* PREDEFINED LISTS */}
-            {Object.entries(INGREDIENTS).map(([category, items]) => (
-              <div key={category}>
-                <h4 className="text-xs font-bold uppercase text-slate-400 mb-3">
-                  {category}
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {items.map((item) => {
-                    const isSelected = selectedItems.includes(item);
-                    return (
-                      <button
-                        key={item}
-                        onClick={() => handleToggleIngredient(item)}
-                        className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border transition-all ${
-                          isSelected
-                            ? "bg-blue-600 border-blue-600 text-white shadow-md shadow-blue-200"
-                            : "bg-white border-slate-200 text-slate-600 hover:border-blue-400"
-                        }`}
-                      >
-                        {item}
-                        {isSelected && <Check className="w-3 h-3" />}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            ))}
-
-            {/* CUSTOM INPUT FIELD */}
-            <div className="pt-4 border-t border-gray-100">
-              <label className="text-xs font-bold uppercase text-slate-400 mb-3 block">
-                Not on the list? Add your own:
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                  placeholder="e.g. Kimchi, Spam, Cheese..."
-                  className="flex-1 border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-black text-sm"
-                />
-                <button
-                  onClick={handleAddCustom}
-                  disabled={!inputValue.trim()}
-                  className="bg-black text-white px-6 rounded-xl font-bold text-sm disabled:opacity-50"
-                >
-                  Add
-                </button>
-              </div>
+            {/* Search Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search (e.g. 'Chicken', 'Tofu')..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAddCustom()}
+                className="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-black transition-all text-sm"
+              />
             </div>
 
-            {/* DISPLAY "EXTRAS" */}
-            {selectedItems.some((i) => !ALL_PREDEFINED.includes(i)) && (
-              <div className="animate-in fade-in slide-in-from-top-2">
-                <h4 className="text-xs font-bold uppercase text-purple-600 mb-2">
-                  Your Extras
-                </h4>
-                <div className="flex flex-wrap gap-2">
-                  {selectedItems
-                    .filter((item) => !ALL_PREDEFINED.includes(item))
-                    .map((item) => (
-                      <button
-                        key={item}
-                        onClick={() => handleToggleIngredient(item)}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm bg-purple-100 text-purple-700 border border-purple-200 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all group"
-                      >
-                        {item}
-                        <span className="bg-purple-200 group-hover:bg-red-200 text-xs w-4 h-4 flex items-center justify-center rounded-full">
-                          ✕
-                        </span>
-                      </button>
-                    ))}
-                </div>
+            {/* Category Tabs (Only show if NOT searching) */}
+            {searchQuery.trim() === "" && (
+              <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
+                {CATEGORIES.map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => setActiveTab(cat)}
+                    className={`whitespace-nowrap px-4 py-2 rounded-full text-xs font-bold transition-all ${
+                      activeTab === cat
+                        ? "bg-black text-white shadow-md"
+                        : "bg-white border border-gray-200 text-gray-600 hover:bg-gray-50"
+                    }`}
+                  >
+                    {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                  </button>
+                ))}
               </div>
             )}
+          </div>
+
+          {/* 2. BASKET (Selected Items) */}
+          {selectedItems.length > 0 && (
+            <div className="mb-6 mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+              <h4 className="text-xs font-bold text-blue-800 uppercase mb-2 flex justify-between items-center">
+                Your Basket
+                <span className="text-blue-500 font-normal normal-case">
+                  Tap to remove
+                </span>
+              </h4>
+              <div className="flex flex-wrap gap-2">
+                {selectedItems.map((item) => (
+                  <button
+                    key={item}
+                    onClick={() => handleToggle(item)}
+                    className="group flex items-center gap-2 px-3 py-1.5 bg-white border border-blue-200 text-blue-700 rounded-lg text-xs font-semibold shadow-sm hover:border-red-200 hover:text-red-600 hover:bg-red-50 transition-all"
+                  >
+                    {item}
+                    <X className="w-3 h-3 text-blue-400 group-hover:text-red-500" />
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* 3. INGREDIENTS GRID */}
+          <div className="mt-4">
+            <H2 className="mb-3 capitalize">
+              {searchQuery ? "Search Results" : activeTab}
+            </H2>
+
+            <div className="flex flex-wrap gap-2 min-h-[100px] content-start">
+              {visibleIngredients.map((item) => {
+                const isSelected = selectedItems.includes(item);
+                return (
+                  <Button
+                    key={item}
+                    variant="outline"
+                    size="xs"
+                    onClick={() => handleToggle(item)}
+                    className={`transition-all duration-200 ${
+                      isSelected
+                        ? "opacity-50 grayscale cursor-not-allowed bg-gray-100" // Visual feedback that it's already in basket
+                        : "hover:border-black hover:scale-105"
+                    }`}
+                  >
+                    {item}
+                    {isSelected && <Check className="w-3 h-3 ml-1" />}
+                  </Button>
+                );
+              })}
+
+              {/* Empty State / Custom Add */}
+              {visibleIngredients.length === 0 && searchQuery && (
+                <button
+                  onClick={handleAddCustom}
+                  className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-sm font-bold hover:bg-gray-800 transition-all"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add "{searchQuery}"
+                </button>
+              )}
+
+              {visibleIngredients.length === 0 && !searchQuery && (
+                <p className="text-gray-400 text-sm italic">No items here.</p>
+              )}
+            </div>
           </div>
         </div>
       )}

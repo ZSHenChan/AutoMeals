@@ -29,20 +29,19 @@ export const MEAL_TYPES = [
 ];
 export const INGREDIENTS = {
   proteins: [
+    "Minced Meat (Any)",
+
     // Poultry
     "Chicken Breast",
     "Chicken Thigh",
     "Chicken Wings",
-    "Minced Chicken",
 
     // Pork
-    "Minced Pork",
     "Pork Belly",
     "Pork Chop",
     "Pork Ribs",
 
     // Beef
-    "Minced Beef",
     "Beef Steak",
     "Beef Cubes",
 
@@ -82,12 +81,7 @@ export const INGREDIENTS = {
     // Root & Aromatics
     "Carrot",
     "Potato",
-    "Sweet Potato",
     "Radish (Daikon)",
-    "Onion (Red/Yellow)",
-    "Garlic",
-    "Ginger",
-    "Spring Onion",
 
     // Others
     "Tomato",
@@ -97,10 +91,7 @@ export const INGREDIENTS = {
     "Eggplant (Brinjal)",
 
     // Mushrooms
-    "Shiitake Mushroom",
-    "Enoki Mushroom",
-    "Button Mushroom",
-    "Shimeji Mushroom",
+    "Mushrooms",
   ],
   fruits: [
     "Apple",
@@ -117,11 +108,9 @@ export const INGREDIENTS = {
     "Strawberries",
   ],
   carbs: [
-    "White Rice",
-    "Brown Rice",
+    "Rice",
     "Bee Hoon (Vermicelli)",
     "Kway Teow",
-    "Yellow Noodles",
     "Pasta (Spaghetti/Fusilli)",
     "Instant Noodles",
     "Bread",

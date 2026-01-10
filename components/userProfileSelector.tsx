@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Flame, ChevronDown, User, Settings2 } from "lucide-react";
 import { SKILL_LEVELS, GOALS, MEAL_TYPES, EQUIPMENT } from "@/lib/config";
+import { ButtonH, H2, H3, PrimarySubH } from "./typography/heading";
+import { Button } from "./button/clickable";
 
 // --- INTERFACE ---
 interface UserProfileSelectorProps {
@@ -75,11 +77,11 @@ export function UserProfileSelector({
             <Settings2 className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-slate-900">Preferences</h3>
-            <p className="text-sm text-slate-500">
+            <H3>Preferences</H3>
+            <PrimarySubH>
               {currentSkillLabel} • {goal} • {mealType}
               {equipmentSummary}
-            </p>
+            </PrimarySubH>
           </div>
         </div>
 
@@ -97,91 +99,80 @@ export function UserProfileSelector({
           <div className="space-y-6 mt-6">
             {/* SKILL LEVEL */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3 flex items-center gap-2">
+              <H2 className="mb-3 flex items-center gap-2">
                 <Flame className="w-4 h-4" /> Cooking Skill
-              </h3>
+              </H2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                 {SKILL_LEVELS.map((level) => (
-                  <button
+                  <Button
                     key={level.id}
                     onClick={() => setSkill(level.id)}
-                    className={`p-3 rounded-lg border-2 text-left transition-all ${
-                      skill === level.id
-                        ? "border-orange-500 bg-orange-50 text-orange-700"
-                        : "border-gray-200 hover:border-orange-200"
+                    className={`text-left ${
+                      skill === level.id &&
+                      "border-orange-500 bg-orange-50 text-orange-700"
                     }`}
                   >
                     <div className="font-semibold text-sm">{level.label}</div>
-                    <div className="text-xs text-slate-500">{level.desc}</div>
-                  </button>
+                    <PrimarySubH className="font-medium">
+                      {level.desc}
+                    </PrimarySubH>
+                  </Button>
                 ))}
               </div>
             </div>
 
             {/* GOAL */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                Today&apos;s Goal
-              </h3>
+              <H2>Today&apos;s Goal</H2>
               <div className="flex flex-wrap gap-2">
                 {GOALS.map((g) => (
-                  <button
+                  <Button
                     key={g}
+                    variant={"secondary"}
+                    size="sm"
                     onClick={() => setGoal(g)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-colors ${
-                      goal === g
-                        ? "bg-slate-800 text-white"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
+                    className={`${goal === g && "bg-slate-800 text-white"}`}
                   >
                     {g}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
 
             {/* MEAL TYPE */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                What are we cooking?
-              </h3>
+              <H2>What are we cooking?</H2>
               <div className="flex flex-wrap gap-2">
                 {MEAL_TYPES.map((m) => (
-                  <button
+                  <Button
                     key={m}
+                    variant={"secondary"}
+                    size="sm"
                     onClick={() => setMealType(m)}
-                    className={`px-4 py-2 rounded-full text-xs font-bold transition-colors ${
-                      mealType === m
-                        ? "bg-slate-800 text-white"
-                        : "bg-slate-100 text-slate-600"
-                    }`}
+                    className={`${mealType === m && "bg-slate-800 text-white"}`}
                   >
                     {m}
-                  </button>
+                  </Button>
                 ))}
               </div>
             </div>
 
             {/* EQUIPMENT */}
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                Equipment
-              </h3>
+              <H2>Equipment</H2>
               <div className="flex flex-wrap gap-2">
                 {EQUIPMENT.map((item) => {
                   const isSelected = equipment.includes(item);
                   return (
-                    <button
+                    <Button
                       key={item}
+                      variant={"secondary"}
+                      size="sm"
                       onClick={() => toggleEquipment(item)}
-                      className={`px-4 py-2 rounded-full text-xs font-bold transition-colors ${
-                        isSelected
-                          ? "bg-slate-800 text-white"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
+                      className={`${isSelected && "bg-slate-800 text-white"}`}
                     >
                       {item}
-                    </button>
+                    </Button>
                   );
                 })}
               </div>

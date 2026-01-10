@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Trash2, ChevronUp, Plus, ChevronDown } from "lucide-react";
+import { H3, PrimarySubH } from "./typography/heading";
 
 // --- CONSTANTS ---
 const DEFAULT_PANTRY_STAPLES = [
@@ -91,14 +92,14 @@ export function PantryShelf({ onContextUpdate }: PantryShelfProps) {
             </svg>
           </div>
           <div>
-            <h3 className="text-lg font-bold text-amber-900">Pantry Shelf</h3>
-            <p className="text-sm text-amber-700/60">
+            <H3 className="text-amber-900">Pantry Shelf</H3>
+            <PrimarySubH className="text-amber-700/60">
               {items.length === 0
                 ? "Empty"
                 : `${items.length} items • ${items.slice(0, 3).join(", ")}${
                     items.length > 3 ? "..." : ""
                   }`}
-            </p>
+            </PrimarySubH>
           </div>
         </div>
 
