@@ -5,7 +5,8 @@ import { promptOpenAI } from "@/lib/openai";
 import { IngredientSelector } from "@/components/ingredientSelector";
 import { UserProfileSelector } from "@/components/userProfileSelector";
 import { PantryShelf } from "@/components/pantryShelf";
-import { RecipeCard, RecipeData } from "@/components/recipeCard";
+import { RecipeCard } from "@/components/recipe/recipe-card";
+import { RecipeData } from "@/components/recipe/recipe-data";
 import { HeroSection } from "@/components/hero";
 import { GenerateRecipeButton } from "@/components/button/generate-recipe-button";
 

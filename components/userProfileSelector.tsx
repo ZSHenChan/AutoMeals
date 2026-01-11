@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Flame, ChevronDown, User, Settings2 } from "lucide-react";
+import { Flame, ChevronDown, Settings2 } from "lucide-react";
 import { SKILL_LEVELS, GOALS, MEAL_TYPES, EQUIPMENT } from "@/lib/config";
-import { ButtonH, H2, H3, PrimarySubH } from "./typography/heading";
+import { H2, H3, PrimarySubH } from "./typography/heading";
 import { Button } from "./button/clickable";
 
 // --- INTERFACE ---

@@ -42,7 +42,7 @@ const AllowExtraToggle = ({
           checked={allowExtras}
           onChange={(e) => setAllowExtras(e.target.checked)}
         />
-        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
+        <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-black"></div>
       </label>
     </div>
   );
@@ -134,7 +134,7 @@ export function IngredientSelector({
       </button>
 
       {isOpen && (
-        <div className="p-6 pt-0 border-t border-gray-100 animate-in slide-in-from-top-2">
+        <div className="p-6 pt-0 border-t border-gray-100 animate-in slide-in-from-top-2 fade-in duration-200">
           {/* 1. CONTROLS SECTION */}
           <div className="space-y-4 mt-6">
             <AllowExtraToggle
@@ -205,7 +205,7 @@ export function IngredientSelector({
               {searchQuery ? "Search Results" : activeTab}
             </H2>
 
-            <div className="flex flex-wrap gap-2 min-h-[100px] content-start">
+            <div className="flex flex-wrap gap-2 min-h-25 content-start">
               {visibleIngredients.map((item) => {
                 const isSelected = selectedItems.includes(item);
                 return (
@@ -214,7 +214,7 @@ export function IngredientSelector({
                     variant="outline"
                     size="xs"
                     onClick={() => handleToggle(item)}
-                    className={`transition-all duration-200 ${
+                    className={`flex transition-all duration-200 ${
                       isSelected
                         ? "opacity-50 grayscale cursor-not-allowed bg-gray-100" // Visual feedback that it's already in basket
                         : "hover:border-black hover:scale-105"
@@ -233,7 +233,7 @@ export function IngredientSelector({
                   className="flex items-center gap-2 px-4 py-2 bg-black text-white rounded-lg text-sm font-bold hover:bg-gray-800 transition-all"
                 >
                   <Plus className="w-4 h-4" />
-                  Add "{searchQuery}"
+                  Add &quot;{searchQuery}&quot;
                 </button>
               )}
 
