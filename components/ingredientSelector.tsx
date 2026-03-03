@@ -5,6 +5,7 @@ import { Utensils, Check, ChevronDown, Search, Plus, X } from "lucide-react";
 import { INGREDIENTS } from "@/lib/config";
 import { H2, H3 } from "./typography/heading";
 import { Button } from "./button/clickable";
+import { usePreferencesContext } from "@/app/context/preferences-context";
 
 const ALL_PREDEFINED = Object.values(INGREDIENTS).flat();
 const CATEGORIES = Object.keys(INGREDIENTS);
@@ -18,20 +19,13 @@ export interface AllowExtraToggleProps {
   setAllowExtras: (arg0: boolean) => void;
 }
 
-const AllowExtraToggle = ({
-  allowExtras,
-  setAllowExtras,
-}: AllowExtraToggleProps) => {
+const AllowExtraToggle = ({ allowExtras, setAllowExtras }: AllowExtraToggleProps) => {
   return (
     <div className="flex mb-4 items-center justify-between bg-gray-50 p-3 rounded-xl border border-gray-100">
       <div className="flex flex-col text-left">
-        <span className="text-sm font-bold text-slate-800">
-          Allow Extra Ingredients?
-        </span>
+        <span className="text-sm font-bold text-slate-800">Allow Extra Ingredients?</span>
         <span className="text-[10px] text-slate-500 font-medium">
-          {allowExtras
-            ? "Chef can suggest items to buy"
-            : "Strict: Cook ONLY with what I have"}
+          {allowExtras ? "Chef can suggest items to buy" : "Strict: Cook ONLY with what I have"}
         </span>
       </div>
 
@@ -48,47 +42,35 @@ const AllowExtraToggle = ({
   );
 };
 
-export function IngredientSelector({
-  onContextUpdate,
-}: IngredientSelectorProps) {
+export function IngredientSelector({ onContextUpdate }: IngredientSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(CATEGORIES[0]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [allowExtras, setAllowExtras] = useState(true);
+  const { ingredients: selectedItems, setIngredients: setSelectedItems } = usePreferencesContext();
 
-  // -- LOGIC: Context Update --
   const strictModeInstruction = allowExtras
     ? "If essential items are missing (Oil, Salt, etc), list them."
     : "STRICT MODE: Only use provided ingredients.";
 
   useEffect(() => {
     const promptPayload =
-      selectedItems.length === 0
-        ? ""
-        : `AVAILABLE INGREDIENTS:\n${selectedItems.join(
-            ", "
-          )}\n${strictModeInstruction}`;
+      selectedItems.length === 0 ? "" : `AVAILABLE INGREDIENTS:\n${selectedItems.join(", ")}\n${strictModeInstruction}`;
     onContextUpdate(promptPayload);
   }, [selectedItems, onContextUpdate, strictModeInstruction]);
 
-  // -- LOGIC: Filtering --
-  // 1. If Searching: Search across ALL categories
-  // 2. If Not Searching: Show only items in Active Tab
   const visibleIngredients = useMemo(() => {
     if (!searchQuery.trim()) {
       return INGREDIENTS[activeTab as keyof typeof INGREDIENTS] || [];
     }
-    return ALL_PREDEFINED.filter((item) =>
-      item.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return ALL_PREDEFINED.filter((item) => item.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [activeTab, searchQuery]);
 
   const handleToggle = (item: string) => {
     if (selectedItems.includes(item)) {
-      setSelectedItems((prev) => prev.filter((i) => i !== item));
+      setSelectedItems(selectedItems.filter((i) => i !== item));
     } else {
-      setSelectedItems((prev) => [...prev, item]);
+      setSelectedItems([...selectedItems, item]);
     }
   };
 
@@ -96,13 +78,12 @@ export function IngredientSelector({
     const trimmed = searchQuery.trim();
     if (trimmed && !selectedItems.includes(trimmed)) {
       handleToggle(trimmed);
-      setSearchQuery(""); // Clear search after adding
+      setSearchQuery("");
     }
   };
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-300">
-      {/* HEADER */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-6 hover:bg-gray-50/50 transition-colors text-left"
@@ -110,9 +91,7 @@ export function IngredientSelector({
         <div className="flex items-center gap-3">
           <div
             className={`p-2 rounded-full transition-colors ${
-              selectedItems.length > 0
-                ? "bg-black text-white"
-                : "bg-gray-100 text-gray-400"
+              selectedItems.length > 0 ? "bg-black text-white" : "bg-gray-100 text-gray-400"
             }`}
           >
             <Utensils className="w-5 h-5" />
@@ -120,29 +99,18 @@ export function IngredientSelector({
           <div>
             <H3>Ingredients</H3>
             <p className="text-sm text-slate-500">
-              {selectedItems.length === 0
-                ? "What's in your fridge?"
-                : `${selectedItems.length} selected`}
+              {selectedItems.length === 0 ? "What's in your fridge?" : `${selectedItems.length} selected`}
             </p>
           </div>
         </div>
-        <ChevronDown
-          className={`w-5 h-5 text-gray-400 transition-transform ${
-            isOpen ? "rotate-180" : ""
-          }`}
-        />
+        <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
       </button>
 
       {isOpen && (
         <div className="p-6 pt-0 border-t border-gray-100 animate-in slide-in-from-top-2 fade-in duration-200">
-          {/* 1. CONTROLS SECTION */}
           <div className="space-y-4 mt-6">
-            <AllowExtraToggle
-              allowExtras={allowExtras}
-              setAllowExtras={setAllowExtras}
-            />
+            <AllowExtraToggle allowExtras={allowExtras} setAllowExtras={setAllowExtras} />
 
-            {/* Search Bar */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -155,7 +123,6 @@ export function IngredientSelector({
               />
             </div>
 
-            {/* Category Tabs (Only show if NOT searching) */}
             {searchQuery.trim() === "" && (
               <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                 {CATEGORIES.map((cat) => (
@@ -175,14 +142,11 @@ export function IngredientSelector({
             )}
           </div>
 
-          {/* 2. BASKET (Selected Items) */}
           {selectedItems.length > 0 && (
             <div className="mb-6 mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
               <h4 className="text-xs font-bold text-blue-800 uppercase mb-2 flex justify-between items-center">
                 Your Basket
-                <span className="text-blue-500 font-normal normal-case">
-                  Tap to remove
-                </span>
+                <span className="text-blue-500 font-normal normal-case">Tap to remove</span>
               </h4>
               <div className="flex flex-wrap gap-2">
                 {selectedItems.map((item) => (
@@ -199,11 +163,8 @@ export function IngredientSelector({
             </div>
           )}
 
-          {/* 3. INGREDIENTS GRID */}
           <div className="mt-4">
-            <H2 className="mb-3 capitalize">
-              {searchQuery ? "Search Results" : activeTab}
-            </H2>
+            <H2 className="mb-3 capitalize">{searchQuery ? "Search Results" : activeTab}</H2>
 
             <div className="flex flex-wrap gap-2 min-h-25 content-start">
               {visibleIngredients.map((item) => {
@@ -216,7 +177,7 @@ export function IngredientSelector({
                     onClick={() => handleToggle(item)}
                     className={`flex transition-all duration-200 ${
                       isSelected
-                        ? "opacity-50 grayscale cursor-not-allowed bg-gray-100" // Visual feedback that it's already in basket
+                        ? "opacity-50 grayscale cursor-not-allowed bg-gray-100"
                         : "hover:border-black hover:scale-105"
                     }`}
                   >
@@ -226,7 +187,6 @@ export function IngredientSelector({
                 );
               })}
 
-              {/* Empty State / Custom Add */}
               {visibleIngredients.length === 0 && searchQuery && (
                 <button
                   onClick={handleAddCustom}

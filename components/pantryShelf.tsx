@@ -3,41 +3,20 @@
 import { useState, useEffect } from "react";
 import { Trash2, ChevronUp, Plus, ChevronDown } from "lucide-react";
 import { H3, PrimarySubH } from "./typography/heading";
+import { usePreferencesContext } from "@/app/context/preferences-context";
+import { SUGGESTED_STAPLES } from "@/lib/config";
 
-// --- CONSTANTS ---
-const DEFAULT_PANTRY_STAPLES = [
-  "Cooking Oil",
-  "Salt",
-  "Black Pepper",
-  "Soy Sauce",
-  "Garlic",
-];
-
-const SUGGESTED_STAPLES = [
-  "Sugar",
-  "Sesame Oil",
-  "Butter",
-  "Ketchup",
-  "Chili Sauce",
-  "Vinegar",
-  "Cornstarch",
-];
-
-// --- INTERFACE ---
 interface PantryShelfProps {
   onContextUpdate: (contextString: string) => void;
 }
 
 export function PantryShelf({ onContextUpdate }: PantryShelfProps) {
-  // --- INTERNAL STATE ---
-  const [items, setItems] = useState<string[]>(DEFAULT_PANTRY_STAPLES);
+  const { pantryShelf: items, setPantryShelf: setItems } = usePreferencesContext();
 
-  // UI States
-  const [isOpen, setIsOpen] = useState(false); // Default to collapsed
+  const [isOpen, setIsOpen] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
-  // --- LOGIC ---
   const handleAdd = (item: string) => {
     const trimmed = item.trim();
     if (trimmed && !items.includes(trimmed)) {
@@ -57,32 +36,22 @@ export function PantryShelf({ onContextUpdate }: PantryShelfProps) {
     }
   };
 
-  // --- SYNC WITH PARENT ---
   useEffect(() => {
     const contextString =
-      items.length > 0
-        ? `Available Pantry Items: ${items.join(", ")}`
-        : "No Pantry Items Available.";
+      items.length > 0 ? `Available Pantry Items: ${items.join(", ")}` : "No Pantry Items Available.";
 
     onContextUpdate(contextString);
   }, [items, onContextUpdate]);
 
   return (
     <div className="bg-amber-50/50 rounded-2xl border border-amber-100 mb-8 overflow-hidden transition-all duration-300">
-      {/* 1. CLICKABLE HEADER */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="w-full flex items-center justify-between p-6 hover:bg-amber-100/50 transition-colors text-left"
       >
         <div className="flex items-center gap-3">
           <div className="bg-amber-100 p-2 rounded-full text-amber-700">
-            {/* Simple Shelf Icon */}
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -96,31 +65,23 @@ export function PantryShelf({ onContextUpdate }: PantryShelfProps) {
             <PrimarySubH className="text-amber-700/60">
               {items.length === 0
                 ? "Empty"
-                : `${items.length} items • ${items.slice(0, 3).join(", ")}${
-                    items.length > 3 ? "..." : ""
-                  }`}
+                : `${items.length} items • ${items.slice(0, 3).join(", ")}${items.length > 3 ? "..." : ""}`}
             </PrimarySubH>
           </div>
         </div>
 
-        {/* Chevron Animation */}
         <ChevronDown
-          className={`w-5 h-5 text-amber-400 transition-transform duration-300 ${
-            isOpen ? "rotate-180" : ""
-          }`}
+          className={`w-5 h-5 text-amber-400 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
-      {/* 2. COLLAPSIBLE CONTENT */}
       {isOpen && (
         <div className="p-6 pt-0 border-t border-amber-100 animate-in slide-in-from-top-2 fade-in duration-200">
           <p className="text-xs text-amber-700/60 mb-6 mt-6">
             Items you already have at home (Oil, Seasonings, Sauces).
           </p>
 
-          {/* THE SHELF GRID */}
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-4">
-            {/* Render Items */}
             {items.map((item) => (
               <button
                 key={item}
@@ -137,7 +98,6 @@ export function PantryShelf({ onContextUpdate }: PantryShelfProps) {
               </button>
             ))}
 
-            {/* Add Button */}
             <button
               onClick={() => setIsAdding(!isAdding)}
               className={`aspect-square rounded-xl border-2 border-dashed flex flex-col items-center justify-center gap-2 transition-all ${
@@ -146,18 +106,11 @@ export function PantryShelf({ onContextUpdate }: PantryShelfProps) {
                   : "border-amber-300 text-amber-400 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50"
               }`}
             >
-              {isAdding ? (
-                <ChevronUp className="w-6 h-6" />
-              ) : (
-                <Plus className="w-6 h-6" />
-              )}
-              <span className="text-xs font-bold uppercase">
-                {isAdding ? "Close" : "Add"}
-              </span>
+              {isAdding ? <ChevronUp className="w-6 h-6" /> : <Plus className="w-6 h-6" />}
+              <span className="text-xs font-bold uppercase">{isAdding ? "Close" : "Add"}</span>
             </button>
           </div>
 
-          {/* EXPANDABLE ADD MENU */}
           {isAdding && (
             <div className="mt-6 pt-6 border-t border-amber-200 animate-in slide-in-from-top-2 fade-in">
               <div className="flex gap-2 mb-4">
@@ -182,17 +135,15 @@ export function PantryShelf({ onContextUpdate }: PantryShelfProps) {
                   Quick Add Staples
                 </span>
                 <div className="flex flex-wrap gap-2">
-                  {SUGGESTED_STAPLES.filter((i) => !items.includes(i)).map(
-                    (item) => (
-                      <button
-                        key={item}
-                        onClick={() => handleAdd(item)}
-                        className="px-3 py-1 bg-white border border-amber-100 rounded-full text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"
-                      >
-                        + {item}
-                      </button>
-                    )
-                  )}
+                  {SUGGESTED_STAPLES.filter((i) => !items.includes(i)).map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => handleAdd(item)}
+                      className="px-3 py-1 bg-white border border-amber-100 rounded-full text-xs font-medium text-amber-800 hover:bg-amber-200 transition-colors"
+                    >
+                      + {item}
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>

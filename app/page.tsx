@@ -2,21 +2,24 @@
 
 import { useState } from "react";
 import { promptOpenAI } from "@/lib/openai";
-import { IngredientSelector } from "@/components/ingredientSelector";
 import { UserProfileSelector } from "@/components/userProfileSelector";
+import { IngredientSelector } from "@/components/ingredientSelector";
 import { PantryShelf } from "@/components/pantryShelf";
 import { RecipeCard } from "@/components/recipe/recipe-card";
 import { RecipeData } from "@/components/recipe/recipe-data";
 import { HeroSection } from "@/components/hero";
 import { GenerateRecipeButton } from "@/components/button/generate-recipe-button";
+import { usePreferencesContext } from "@/app/context/preferences-context";
+import type { UserPreferences } from "@/types/preferences";
 
-export default function SmartCookPage() {
+function SmartCookContent() {
   const [profileContext, setProfileContext] = useState("");
-  const [ingredientsContext, setingredientsContext] = useState<string>("");
+  const [ingredientsContext, setIngredientsContext] = useState("");
   const [pantryContext, setPantryContext] = useState("");
-
   const [isGenerating, setIsGenerating] = useState(false);
   const [recipeResult, setRecipeResult] = useState<RecipeData | null>(null);
+  const { userId, isReady, cookingSkill, equipments, ingredients, pantryShelf } =
+    usePreferencesContext();
 
   const constructPrompt = () => {
     const prompt = `Generate a recipe that fulfills user requirement:
@@ -34,8 +37,30 @@ export default function SmartCookPage() {
     setIsGenerating(true);
 
     try {
-      const data = await promptOpenAI(constructPrompt());
-      setRecipeResult(data);
+      const savePreferencesPromise = fetch(`/api/preferences?userId=${userId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          cookingSkill,
+          equipments,
+          ingredients,
+          pantryShelf,
+        } satisfies UserPreferences),
+      });
+
+      const generateRecipePromise = promptOpenAI(constructPrompt());
+
+      const [saveResult, recipeResult] = await Promise.allSettled([savePreferencesPromise, generateRecipePromise]);
+
+      if (recipeResult.status === "fulfilled") {
+        setRecipeResult(recipeResult.value);
+      } else {
+        console.error("Recipe generation failed:", recipeResult.reason);
+      }
+
+      if (saveResult.status === "rejected") {
+        console.warn("Failed to save preferences silently:", saveResult.reason);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -44,46 +69,41 @@ export default function SmartCookPage() {
     }
   };
 
-  // If we have a result, show the RecipeCard instead of the form
   if (recipeResult) {
     return (
       <div className="min-h-screen bg-gray-50 p-6 md:p-12 font-sans flex items-center justify-center">
         <div className="w-full max-w-md">
-          <RecipeCard
-            data={recipeResult}
-            onReset={() => setRecipeResult(null)}
-          />
+          <RecipeCard data={recipeResult} onReset={() => setRecipeResult(null)} />
         </div>
       </div>
     );
   }
 
-  // Otherwise, show the Form
   return (
     <div className="min-h-screen bg-gray-50 p-6 md:p-12 font-sans text-slate-800">
       <div className="min-h-screen max-w-3xl mx-auto space-y-10 pb-24 relative">
         <HeroSection />
 
-        {/* PROFILE SECTION */}
-        <UserProfileSelector
-          onContextUpdate={(ctx) => setProfileContext(ctx)}
-        />
+        {isReady ? (
+          <>
+            <UserProfileSelector onContextUpdate={(ctx) => setProfileContext(ctx)} />
+            <IngredientSelector onContextUpdate={(ctx) => setIngredientsContext(ctx)} />
+            <PantryShelf onContextUpdate={(ctx) => setPantryContext(ctx)} />
+          </>
+        ) : (
+          <UserProfileSelector onContextUpdate={(ctx) => setProfileContext(ctx)} />
+        )}
 
-        {/* INGREDIENT SECTION */}
-        <IngredientSelector
-          onContextUpdate={(ctx) => setingredientsContext(ctx)}
-        />
-
-        {/* PANTRY SECTION */}
-        <PantryShelf onContextUpdate={(ctx) => setPantryContext(ctx)} />
-
-        {/* PROMPT LLM BUTTON */}
         <GenerateRecipeButton
           onClick={generatePrompt}
-          isDisabled={isGenerating || ingredientsContext.trim() === ""}
+          isDisabled={isGenerating || !isReady || ingredients.length === 0}
           isGenerating={isGenerating}
         />
       </div>
     </div>
   );
+}
+
+export default function SmartCookPage() {
+  return <SmartCookContent />;
 }

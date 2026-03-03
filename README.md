@@ -6,6 +6,18 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
+### Redis Preference Storage (Optional)
+
+User preferences are persisted through `/api/preferences` and stored in Redis
+when these variables are set:
+
+```bash
+REDIS_URL=redis://<username>:<password>@<host>:<port>
+```
+
+Without these values, the app falls back to in-memory defaults and does not
+persist between reloads.
+
 First, run the development server:
 
 ```bash

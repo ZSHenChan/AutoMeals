@@ -19,7 +19,7 @@ export function MissingIngredients({ items }: { items: string[] }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2">
         {items.map((item, i) => (
           <div
             key={i}

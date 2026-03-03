@@ -4,29 +4,14 @@ export const SKILL_LEVELS = [
   { id: "intermediate", label: "Intermediate", desc: "Can follow recipes" },
 ];
 
-export const EQUIPMENT = [
-  "Rice Cooker",
-  "Wok",
-  "Air Fryer",
-  "Microwave",
-  "Stove",
-  "Pan",
-];
-export const GOALS = [
-  "Normal",
-  "Quick Meal (< 15 mins)",
-  "High Protein",
-  "Comfort Food",
-  "Low Calorie",
-];
-export const MEAL_TYPES = [
-  "Breakfast",
-  "Lunch",
-  "Dinner",
-  "Drinks",
-  "Snack",
-  "Dessert",
-];
+export const DEFAULT_USER_ID = "default-user";
+
+export const DEFAULT_PANTRY_SHELF = ["Cooking Oil", "Salt", "Black Pepper", "Soy Sauce", "Garlic"];
+export const SUGGESTED_STAPLES = ["Sugar", "Sesame Oil", "Butter", "Ketchup", "Chili Sauce", "Vinegar", "Cornstarch"];
+
+export const EQUIPMENT = ["Rice Cooker", "Wok", "Air Fryer", "Microwave", "Stove", "Pan", "Blender"];
+export const GOALS = ["Normal", "Quick Meal (< 15 mins)", "High Protein", "Comfort Food", "Low Calorie"];
+export const MEAL_TYPES = ["Breakfast", "Lunch", "Dinner", "Drinks", "Snack", "Dessert"];
 export const INGREDIENTS = {
   proteins: [
     "Minced Meat (Any)",

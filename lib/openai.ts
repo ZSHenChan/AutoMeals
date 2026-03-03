@@ -1,11 +1,12 @@
 import { z } from "zod";
+import type { GeneratedRecipe } from "@/types/recipe";
 
 export const ingredientSchema = z.object({
   name: z.string().describe("Name of the ingredient."),
   quantity: z.string().describe("Quantity of the ingredient, including units."),
 });
 
-const recipeSchema = z.object({
+export const recipeSchema = z.object({
   title: z.string().describe("The title of the meal recipe."),
   time: z
     .string()
@@ -30,8 +31,6 @@ const recipeSchema = z.object({
     )
     .describe("A list of steps guiding user to prepare the meal."),
 });
-
-export type GeneratedRecipe = z.infer<typeof recipeSchema>;
 
 export const promptOpenAI = async (
   prompt: string

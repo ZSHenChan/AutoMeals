@@ -9,11 +9,7 @@ interface GenerateRecipeButtonProps {
   isDisabled: boolean;
 }
 
-export function GenerateRecipeButton({
-  onClick,
-  isGenerating,
-  isDisabled,
-}: GenerateRecipeButtonProps) {
+export function GenerateRecipeButton({ onClick, isGenerating, isDisabled }: GenerateRecipeButtonProps) {
   const [isVisible, setIsVisible] = useState(true);
   const lastScrollY = useRef(0);
 
@@ -21,16 +17,12 @@ export function GenerateRecipeButton({
     const handleScroll = () => {
       const currentScrollY = window.scrollY;
 
-      // 1. If at the very top, always show it
       if (currentScrollY < 10) {
         setIsVisible(true);
         lastScrollY.current = currentScrollY;
         return;
       }
 
-      // 2. Determine direction
-      // Scrolling DOWN (current > last) -> Hide
-      // Scrolling UP (current < last) -> Show
       if (currentScrollY > lastScrollY.current) {
         setIsVisible(false);
       } else {
@@ -49,11 +41,7 @@ export function GenerateRecipeButton({
       className={`
         fixed left-0 right-0 z-50 flex justify-center px-4
         transition-all duration-300 ease-in-out
-        ${
-          isVisible
-            ? "bottom-6 md:bottom-8 opacity-100"
-            : "-bottom-24 opacity-0"
-        }
+        ${isVisible ? "bottom-6 md:bottom-8 opacity-100" : "-bottom-24 opacity-0"}
       `}
     >
       <button
@@ -67,11 +55,7 @@ export function GenerateRecipeButton({
             text-base md:text-lg 
             shadow-2xl hover:shadow-xl 
             transition-transform hover:scale-105 active:scale-95 
-            ${
-              isDisabled
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : "bg-black text-white hover:bg-gray-800"
-            }
+            ${isDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-black text-white hover:bg-gray-800"}
         `}
       >
         {isGenerating ? (
