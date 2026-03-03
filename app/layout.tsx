@@ -5,6 +5,7 @@ import "./globals.css";
 import { PreferencesProvider } from "@/app/context/preferences-context";
 import { DEFAULT_USER_ID } from "@/lib/config";
 import { validateUserId } from "@/lib/user-id";
+import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -34,6 +35,7 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <Analytics />
         <PreferencesProvider userId={activeUserId}>{children}</PreferencesProvider>
       </body>
     </html>
